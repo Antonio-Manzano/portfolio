@@ -22,12 +22,12 @@ def cargar_modelos():
     # Formato: "Nombre del modelo": "ID_del_archivo_en_Drive"
     modelos_drive = {
         "modelo_1": "1E71bCtMSqX2iurQlA_LTfEtbkVqRjwDh", 
-        "modelo_2": "1Py-mtp5RO8L0Wqoi3bJEluZfdurn6c-n",
+        #"modelo_2": "1Py-mtp5RO8L0Wqoi3bJEluZfdurn6c-n",
         "modelo_3": "16yShYONQ7E_YpkuFQ1HiWNRSutGzhzIk", 
         "modelo_4": "1sg7TTVjqm6kPEDL6sUJn_6NWsTJdLWE1",
         "modelo_5": "1flP34CF0BS-7dU-Bmoxr0jTRIUYMSEC6", 
         "modelo_6": "17s7NiPtdOQ0D8S9K5eezYGlpJ51OWazV",
-        "modelo_7": "1Q5sPV3pN3j7lH1cHbAIOOh1Vxn5s9HT-", 
+        #"modelo_7": "1Q5sPV3pN3j7lH1cHbAIOOh1Vxn5s9HT-", 
         "modelo_8": "1MmdfVGFtqYdCft3IEdY6vdKlr8ttUk_l"
     }
     
