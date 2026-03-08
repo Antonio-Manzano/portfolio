@@ -4,10 +4,16 @@ import cv2
 import joblib
 import os
 import pandas as pd
-import gdown  # <-- Nueva librería
+import gdown  
 from streamlit_drawable_canvas import st_canvas
 
-# (Todo lo de st.set_page_config y el título se queda igual...)
+# 1. ESTO TIENE QUE SER LO PRIMERO DE STREAMLIT (No lo muevas de aquí)
+st.set_page_config(page_title="Clasificador EMNIST", layout="wide")
+
+st.title("🧠 Reconocimiento Óptico: Clasificador EMNIST")
+st.markdown("""
+Esta aplicación utiliza **Visión por Computadora (OpenCV)** y un ensamble de modelos de **Machine Learning (Scikit-Learn)** para reconocer caracteres escritos a mano en tiempo real.
+""")
 
 EMNIST_MAPPING = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghnqrt"
 
@@ -18,10 +24,8 @@ EMNIST_MAPPING = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghnqrt"
 def cargar_modelos():
     modelos = {}
     
-    # ⚠️ AQUÍ PONES TUS IDs DE GOOGLE DRIVE ⚠️
-    # Formato: "Nombre del modelo": "ID_del_archivo_en_Drive"
     modelos_drive = {
-        "modelo_1": "1E71bCtMSqX2iurQlA_LTfEtbkVqRjwDh", 
+        #"modelo_1": "1E71bCtMSqX2iurQlA_LTfEtbkVqRjwDh", 
         #"modelo_2": "1Py-mtp5RO8L0Wqoi3bJEluZfdurn6c-n",
         "modelo_3": "16yShYONQ7E_YpkuFQ1HiWNRSutGzhzIk", 
         "modelo_4": "1sg7TTVjqm6kPEDL6sUJn_6NWsTJdLWE1",
@@ -31,20 +35,17 @@ def cargar_modelos():
         "modelo_8": "1MmdfVGFtqYdCft3IEdY6vdKlr8ttUk_l"
     }
     
-    # Crea la carpeta localmente en el servidor de Streamlit
     carpeta = "clasificadores"
     os.makedirs(carpeta, exist_ok=True)
 
     for nombre, file_id in modelos_drive.items():
         ruta_local = os.path.join(carpeta, f"{nombre}.pkl")
         
-        # Si el modelo no está descargado aún, lo bajamos de Drive
         if not os.path.exists(ruta_local):
-            url = f"https://drive.google.com/uc?id={file_id}"
             with st.spinner(f"Descargando {nombre} desde Drive (esto solo pasa la primera vez)..."):
-                gdown.download(url, ruta_local, quiet=False)
+                # Forma más segura de usar gdown con el puro ID
+                gdown.download(id=file_id, output=ruta_local, quiet=False)
         
-        # Una vez descargado, lo cargamos a la memoria con joblib
         try:
             modelos[nombre] = joblib.load(ruta_local)
         except Exception as e:
@@ -54,4 +55,98 @@ def cargar_modelos():
 
 modelos = cargar_modelos()
 
-# (El resto de tu código de la Interfaz Gráfica hacia abajo se queda exactamente igual...)
+# ==========================================
+# INTERFAZ GRÁFICA (LIENZO Y RESULTADOS)
+# ==========================================
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    st.subheader("Lienzo de Dibujo")
+    st.info("Dibuja un número o letra en el recuadro negro:")
+    
+    canvas_result = st_canvas(
+        fill_color="black",
+        stroke_width=20,
+        stroke_color="white",
+        background_color="black",
+        height=280,
+        width=280,
+        drawing_mode="freedraw",
+        key="canvas",
+    )
+    
+    btn_predecir = st.button("Ejecutar Modelos", type="primary", use_container_width=True)
+    st.caption(f"Caracteres soportados: {EMNIST_MAPPING}")
+
+with col2:
+    st.subheader("Análisis del Ensamble")
+    
+    if btn_predecir and canvas_result.image_data is not None:
+        if not modelos:
+            st.warning("⚠️ Hubo un problema cargando los modelos.")
+        else:
+            with st.spinner("Procesando imagen e inferencias..."):
+                img_array = canvas_result.image_data.astype(np.uint8)
+                gray = cv2.cvtColor(img_array, cv2.COLOR_RGBA2GRAY)
+                resized = cv2.resize(gray, (28, 28), interpolation=cv2.INTER_AREA)
+                transposed = np.transpose(resized)
+                flattened = transposed.reshape(1, 784) / 255.0
+
+                prob_total = None
+                resultados = []
+
+                for nombre, modelo_cargado in modelos.items():
+                    X = flattened
+                    
+                    if isinstance(modelo_cargado, tuple):
+                        transformador, modelo = modelo_cargado
+                        if hasattr(transformador, "transform"):
+                            X = transformador.transform(flattened)
+                    else:
+                        modelo = modelo_cargado
+
+                    if hasattr(modelo, "predict_proba"):
+                        prob = modelo.predict_proba(X)[0]
+                    else:
+                        pred = modelo.predict(X)[0]
+                        prob = np.zeros(len(EMNIST_MAPPING))
+                        prob[pred] = 1.0
+
+                    if prob_total is None:
+                        prob_total = prob.copy()
+                    else:
+                        prob_total += prob
+
+                    idx = np.argsort(prob)[-3:][::-1]
+                    top1, top2, top3 = idx
+                    c1, c2, c3 = prob[top1], prob[top2], prob[top3]
+                    p1, p2, p3 = EMNIST_MAPPING[top1], EMNIST_MAPPING[top2], EMNIST_MAPPING[top3]
+
+                    resultados.append({
+                        "Modelo": nombre,
+                        "Predicción 1": f"{p1} ({c1*100:.1f}%)",
+                        "Predicción 2": f"{p2} ({c2*100:.1f}%)",
+                        "Predicción 3": f"{p3} ({c3*100:.1f}%)"
+                    })
+
+                prob_prom = prob_total / len(modelos)
+                final_idx = np.argmax(prob_prom)
+                final_char = EMNIST_MAPPING[final_idx]
+                confianza = np.max(prob_prom)
+
+                color = "green" if confianza >= 0.6 else "red"
+                st.markdown(f"""
+                <div style="background-color:#1E1E1E; border:2px solid {color}; border-radius:12px; padding:20px; text-align:center;">
+                    <h3 style="color:#9E9E9E; margin:0;">Consenso Final</h3>
+                    <h1 style="color:white; font-size:60px; margin:0;">{final_char}</h1>
+                    <p style="color:{color}; font-size:20px; margin:0;">Confianza: {confianza*100:.1f}%</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                st.write("")
+                
+                st.markdown("**Desglose por Modelo:**")
+                df_resultados = pd.DataFrame(resultados)
+                st.dataframe(df_resultados, use_container_width=True, hide_index=True)
+    else:
+        st.info("👈 Dibuja algo en el lienzo y presiona 'Ejecutar Modelos'.")
