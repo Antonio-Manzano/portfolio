@@ -1,5 +1,9 @@
 streamlit
 yfinance
 pandas
-numpy
 plotly
+numpy
+streamlit-drawable-canvas
+opencv-python-headless
+scikit-learn
+joblib
