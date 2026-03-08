@@ -32,16 +32,27 @@ if start_date >= end_date:
 @st.cache_data
 def load_data(ticker, start, end):
     try:
-        stock = yf.Ticker(ticker)
-        data = stock.history(start=start, end=end)
+        # Convertimos las fechas a texto (YYYY-MM-DD) para mayor estabilidad
+        start_str = start.strftime('%Y-%m-%d')
+        end_str = end.strftime('%Y-%m-%d')
+        
+        # Usamos download que suele ser más robusto para rangos de fechas
+        data = yf.download(ticker, start=start_str, end=end_str, progress=False)
+        
         if not data.empty:
+            # Aplanar Multi-índices si yfinance decide devolverlos
+            if isinstance(data.columns, pd.MultiIndex):
+                data.columns = data.columns.droplevel(1)
+                
             data.reset_index(inplace=True)
+            
             # Limpiamos la zona horaria
             if 'Date' in data.columns:
                 data['Date'] = pd.to_datetime(data['Date']).dt.tz_localize(None)
         return data
     except Exception as e:
-        return pd.DataFrame() # Si hay un error de conexión, devolvemos una tabla vacía
+        st.error(f"Error técnico interno: {e}") # Esto nos dirá exactamente qué falló
+        return pd.DataFrame()
 
 with st.spinner('Descargando datos financieros...'):
     data = load_data(ticker_symbol, start_date, end_date)
