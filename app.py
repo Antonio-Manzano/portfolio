@@ -233,7 +233,7 @@ with tab_github:
     """)
         with col2:
             st.info("Concepts: C++, Memory Management, Algorithmic Complexity")
-            st.button("View on GitHub", key="edulibreria", on_click=lambda: st.experimental_set_query_params(url="https://github.com/TU_USUARIO/edulibreria"))
+            st.button("View on GitHub", key="edulibreria", on_click=lambda: st.experimental_set_query_params(url="https://github.com/Antonio-Manzano/algoritmos/tree/b018c9dfc70d39e7ddc86dc6ae2b1f594ae317c5/Edu-Librer%C3%ADa"))
     
     # ==========================================
     # Project 2: Iticritics
@@ -261,7 +261,7 @@ with tab_github:
     """)
         with col2:
             st.info("Concepts: SQL Normalized, Node.js, Client-Server Architecture")
-            st.button("View on GitHub", key="iticritics", on_click=lambda: st.experimental_set_query_params(url="https://github.com/TU_USUARIO/iticritics"))
+            st.button("View on GitHub", key="iticritics", on_click=lambda: st.experimental_set_query_params(url="https://github.com/Antonio-Manzano/algoritmos/tree/b018c9dfc70d39e7ddc86dc6ae2b1f594ae317c5/ITICRITICS"))
     
     # ==========================================
     # Project 3: Flooded
@@ -289,7 +289,7 @@ with tab_github:
     """)
         with col2:
             st.info("Concepts: MongoDB (NoSQL), API Creation, React.js")
-            st.button("View on GitHub", key="flooded", on_click=lambda: st.experimental_set_query_params(url="https://github.com/TU_USUARIO/flooded"))
+            st.button("View on GitHub", key="flooded", on_click=lambda: st.experimental_set_query_params(url="https://github.com/Antonio-Manzano/algoritmos/tree/b018c9dfc70d39e7ddc86dc6ae2b1f594ae317c5/flooded"))
 # ========================
 # EMNIST
 # ========================
@@ -426,4 +426,5 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
 
