@@ -330,6 +330,11 @@ with tab_emnist:
         final_consensus = "Final Consensus"
         model_breakdown = "Breakdown by Model:"
         supported_chars = "Supported characters"
+        confidence = "Confidence"
+        dataset_note = """
+**Technical Note:** The feature extraction and model training were limited to a pre-generated subset of the *EMNIST Balanced* dataset. 
+Therefore, predictions for characters that deviate from this distribution may have reduced accuracy. The goal is to demonstrate the ensemble architecture and real-time inference pipeline.
+"""
     else:
         st.title("Reconocimiento Óptico EMNIST")
         canvas_title = "Lienzo de Dibujo"
@@ -340,6 +345,11 @@ with tab_emnist:
         final_consensus = "Consenso Final"
         model_breakdown = "Desglose por Modelo:"
         supported_chars = "Caracteres soportados"
+        confidence = "Confianza"
+        dataset_note = """
+**Nota Técnica:** La extracción de características y el entrenamiento del modelo se limitaron exclusivamente a un subconjunto pre-generado de la base de datos *EMNIST Balanced*. 
+Por lo tanto, la generalización ante trazos fuera de esta distribución puede ser limitada. El objetivo es demostrar la arquitectura del ensamble y el pipeline de inferencia en tiempo real.
+"""
 
     EMNIST_MAPPING = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghnqrt"
 
@@ -369,6 +379,7 @@ with tab_emnist:
     with col1:
         st.subheader(canvas_title)
         st.info(canvas_note)
+        st.markdown(dataset_note)  # <-- Aquí añadimos la nota sobre la limitación del dataset
         canvas_result = st_canvas(
             fill_color="black",
             stroke_width=20,
@@ -381,7 +392,6 @@ with tab_emnist:
         )
         btn_predecir = st.button(btn_text, type="primary", use_container_width=True)
         st.caption(f"{supported_chars}: {EMNIST_MAPPING}")
-
     with col2:
         st.subheader(ensemble_title)
         if btn_predecir and canvas_result.image_data is not None:
@@ -427,7 +437,7 @@ with tab_emnist:
             <div style="background-color:#1E1E1E; border:2px solid {color}; border-radius:12px; padding:20px; text-align:center;">
                 <h3 style="color:#9E9E9E; margin:0;">{final_consensus}</h3>
                 <h1 style="color:white; font-size:60px; margin:0;">{final_char}</h1>
-                <p style="color:{color}; font-size:20px; margin:0;">Confidence / Confianza: {confianza*100:.1f}%</p>
+                <p style="color:{color}; font-size:20px; margin:0;">{confidence}: {confianza*100:.1f}%</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -536,6 +546,7 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
 
 
 
