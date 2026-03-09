@@ -412,10 +412,10 @@ with tab_emnist:
                 c1, c2, c3 = prob[top1], prob[top2], prob[top3]
                 p1, p2, p3 = EMNIST_MAPPING[top1], EMNIST_MAPPING[top2], EMNIST_MAPPING[top3]
                 resultados.append({
-                    "Model": nombre if lang=="English" else "Modelo",
-                    "Prediction 1" if lang=="English" else "Predicción 1": f"{p1} ({c1*100:.1f}%)",
-                    "Prediction 2" if lang=="English" else "Predicción 2": f"{p2} ({c2*100:.1f}%)",
-                    "Prediction 3" if lang=="English" else "Predicción 3": f"{p3} ({c3*100:.1f}%)"
+                    "Model": nombre if language=="English" else "Modelo",
+                    "Prediction 1" if language=="English" else "Predicción 1": f"{p1} ({c1*100:.1f}%)",
+                    "Prediction 2" if language=="English" else "Predicción 2": f"{p2} ({c2*100:.1f}%)",
+                    "Prediction 3" if language=="English" else "Predicción 3": f"{p3} ({c3*100:.1f}%)"
                 })
 
             prob_prom = prob_total / len(modelos)
@@ -536,6 +536,7 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
 
 
 
