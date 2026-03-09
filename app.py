@@ -232,17 +232,17 @@ with tab_github:
     - **Optimización:** Reducción del overhead computacional mediante estructuración lógica de los datos.
     """)
         with col2:
-    st.info("Concepts: C++, Memory Management, Algorithmic Complexity")
-    
-    st.markdown(
-        """
-        <a href="https://github.com/Antonio-Manzano/algoritmos/tree/b018c9dfc70d39e7ddc86dc6ae2b1f594ae317c5/Edu-Librería" target="_blank">
-        <button style="padding:8px 16px; border-radius:5px; background-color:#1E90FF; color:white; border:none; cursor:pointer;">
-        View on GitHub
-        </button></a>
-        """,
-        unsafe_allow_html=True
-    )
+            st.info("Concepts: C++, Memory Management, Algorithmic Complexity")
+            
+            st.markdown(
+                """
+                <a href="https://github.com/Antonio-Manzano/algoritmos/tree/b018c9dfc70d39e7ddc86dc6ae2b1f594ae317c5/Edu-Librería" target="_blank">
+                <button style="padding:8px 16px; border-radius:5px; background-color:#1E90FF; color:white; border:none; cursor:pointer;">
+                View on GitHub
+                </button></a>
+                """,
+                unsafe_allow_html=True
+            )
     # ==========================================
     # Project 2: Iticritics
     # ==========================================
@@ -268,17 +268,17 @@ with tab_github:
     - **Integración Backend:** Node.js + JavaScript para la lógica del servidor.
     """)
         with col2:
-    st.info("Concepts: SQL Normalized, Node.js, Client-Server Architecture")
+            st.info("Concepts: SQL Normalized, Node.js, Client-Server Architecture")
     
-    st.markdown(
-        """
-        <a href="https://github.com/Antonio-Manzano/algoritmos/tree/b018c9dfc70d39e7ddc86dc6ae2b1f594ae317c5/ITICRITICS" target="_blank">
-        <button style="padding:8px 16px; border-radius:5px; background-color:#1E90FF; color:white; border:none; cursor:pointer;">
-        View on GitHub
-        </button></a>
-        """,
-        unsafe_allow_html=True
-    )
+            st.markdown(
+                """
+                <a href="https://github.com/Antonio-Manzano/algoritmos/tree/b018c9dfc70d39e7ddc86dc6ae2b1f594ae317c5/ITICRITICS" target="_blank">
+                <button style="padding:8px 16px; border-radius:5px; background-color:#1E90FF; color:white; border:none; cursor:pointer;">
+                View on GitHub
+                </button></a>
+                """,
+                unsafe_allow_html=True
+            )
     
     # ==========================================
     # Project 3: Flooded
@@ -305,17 +305,17 @@ with tab_github:
     - **Frontend:** Integración con React.js mostrando flujo completo de datos.
     """)
         with col2:
-    st.info("Concepts: MongoDB (NoSQL), API Creation, React.js")
-    
-    st.markdown(
-        """
-        <a href="https://github.com/Antonio-Manzano/algoritmos/tree/b018c9dfc70d39e7ddc86dc6ae2b1f594ae317c5/flooded" target="_blank">
-        <button style="padding:8px 16px; border-radius:5px; background-color:#1E90FF; color:white; border:none; cursor:pointer;">
-        View on GitHub
-        </button></a>
-        """,
-        unsafe_allow_html=True
-    )
+            st.info("Concepts: MongoDB (NoSQL), API Creation, React.js")
+            
+            st.markdown(
+                """
+                <a href="https://github.com/Antonio-Manzano/algoritmos/tree/b018c9dfc70d39e7ddc86dc6ae2b1f594ae317c5/flooded" target="_blank">
+                <button style="padding:8px 16px; border-radius:5px; background-color:#1E90FF; color:white; border:none; cursor:pointer;">
+                View on GitHub
+                </button></a>
+                """,
+                unsafe_allow_html=True
+            )
 # ========================
 # EMNIST
 # ========================
@@ -452,6 +452,7 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
 
 
 
