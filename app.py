@@ -321,7 +321,7 @@ with tab_github:
 # ========================
 with tab_emnist:
     with st.expander("EMNIST OCR / Reconocimiento Óptico EMNIST"):
-        if lang == "English":
+        if language == "English":
             st.title("EMNIST Optical Character Recognition")
             canvas_title = "Drawing Canvas"
             canvas_note = "Draw a number or letter inside the black box:"
@@ -537,6 +537,7 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
 
 
 
