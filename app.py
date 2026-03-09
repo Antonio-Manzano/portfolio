@@ -320,98 +320,122 @@ with tab_github:
 # EMNIST
 # ========================
 with tab_emnist:
-    st.title("Reconocimiento Óptico EMNIST")
-    EMNIST_MAPPING = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghnqrt"
-
-    # Cargar modelos
-    @st.cache_resource
-    def cargar_modelos():
-        modelos = {}
-        modelos_drive = {
-            "modelo_3": "16yShYONQ7E_YpkuFQ1HiWNRSutGzhzIk", 
-            "modelo_4": "1sg7TTVjqm6kPEDL6sUJn_6NWsTJdLWE1",
-            "modelo_5": "1flP34CF0BS-7dU-Bmoxr0jTRIUYMSEC6", 
-            "modelo_6": "17s7NiPtdOQ0D8S9K5eezYGlpJ51OWazV",
-            "modelo_8": "1MmdfVGFtqYdCft3IEdY6vdKlr8ttUk_l"
-        }
-        carpeta = "clasificadores"
-        os.makedirs(carpeta, exist_ok=True)
-        for nombre, file_id in modelos_drive.items():
-            ruta_local = os.path.join(carpeta, f"{nombre}.pkl")
-            if not os.path.exists(ruta_local):
-                gdown.download(id=file_id, output=ruta_local, quiet=False)
-            modelos[nombre] = joblib.load(ruta_local)
-        return modelos
-
-    modelos = cargar_modelos()
-
-    col1, col2 = st.columns([1,2])
-    with col1:
-        st.subheader("Lienzo de Dibujo")
-        canvas_result = st_canvas(
-            fill_color="black",
-            stroke_width=20,
-            stroke_color="white",
-            background_color="black",
-            height=280,
-            width=280,
-            drawing_mode="freedraw",
-            key="canvas",
-        )
-        btn_predecir = st.button("Ejecutar Modelos", type="primary", use_container_width=True)
-        st.caption(f"Caracteres soportados: {EMNIST_MAPPING}")
-
-    with col2:
-        st.subheader("Análisis del Ensamble")
-        if btn_predecir and canvas_result.image_data is not None:
-            img_array = canvas_result.image_data.astype(np.uint8)
-            gray = cv2.cvtColor(img_array, cv2.COLOR_RGBA2GRAY)
-            resized = cv2.resize(gray, (28,28), interpolation=cv2.INTER_AREA)
-            flattened = np.transpose(resized).reshape(1,784)/255.0
-
-            prob_total = None
-            resultados = []
-
-            for nombre, modelo_cargado in modelos.items():
-                if isinstance(modelo_cargado, tuple):
-                    transformador, modelo = modelo_cargado
-                    X = transformador.transform(flattened)
-                else:
-                    modelo = modelo_cargado
-                    X = flattened
-                if hasattr(modelo, "predict_proba"):
-                    prob = modelo.predict_proba(X)[0]
-                else:
-                    pred = modelo.predict(X)[0]
-                    prob = np.zeros(len(EMNIST_MAPPING))
-                    prob[pred]=1
-                prob_total = prob if prob_total is None else prob_total + prob
-                idx = np.argsort(prob)[-3:][::-1]
-                top1, top2, top3 = idx
-                c1, c2, c3 = prob[top1], prob[top2], prob[top3]
-                p1, p2, p3 = EMNIST_MAPPING[top1], EMNIST_MAPPING[top2], EMNIST_MAPPING[top3]
-                resultados.append({
-                    "Modelo": nombre,
-                    "Predicción 1": f"{p1} ({c1*100:.1f}%)",
-                    "Predicción 2": f"{p2} ({c2*100:.1f}%)",
-                    "Predicción 3": f"{p3} ({c3*100:.1f}%)"
-                })
-            prob_prom = prob_total / len(modelos)
-            final_char = EMNIST_MAPPING[np.argmax(prob_prom)]
-            confianza = np.max(prob_prom)
-            color = "green" if confianza >= 0.6 else "red"
-            st.markdown(f"""
-            <div style="background-color:#1E1E1E; border:2px solid {color}; border-radius:12px; padding:20px; text-align:center;">
-                <h3 style="color:#9E9E9E; margin:0;">Consenso Final</h3>
-                <h1 style="color:white; font-size:60px; margin:0;">{final_char}</h1>
-                <p style="color:{color}; font-size:20px; margin:0;">Confianza: {confianza*100:.1f}%</p>
-            </div>
-            """, unsafe_allow_html=True)
-            st.markdown("**Desglose por Modelo:**")
-            st.dataframe(pd.DataFrame(resultados), use_container_width=True, hide_index=True)
+    with st.expander("EMNIST OCR / Reconocimiento Óptico EMNIST"):
+        if lang == "English":
+            st.title("EMNIST Optical Character Recognition")
+            canvas_title = "Drawing Canvas"
+            canvas_note = "Draw a number or letter inside the black box:"
+            btn_text = "Run Models"
+            ensemble_title = "Ensemble Analysis"
+            empty_note = "Draw something on the canvas and press 'Run Models'."
+            final_consensus = "Final Consensus"
+            model_breakdown = "Breakdown by Model:"
+            supported_chars = "Supported characters"
         else:
-            st.info("Dibuja algo en el lienzo y presiona 'Ejecutar Modelos'.")
-
+            st.title("Reconocimiento Óptico EMNIST")
+            canvas_title = "Lienzo de Dibujo"
+            canvas_note = "Dibuja un número o letra en el recuadro negro:"
+            btn_text = "Ejecutar Modelos"
+            ensemble_title = "Análisis del Ensamble"
+            empty_note = "Dibuja algo en el lienzo y presiona 'Ejecutar Modelos'."
+            final_consensus = "Consenso Final"
+            model_breakdown = "Desglose por Modelo:"
+            supported_chars = "Caracteres soportados"
+    
+        EMNIST_MAPPING = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghnqrt"
+    
+        # Cargar modelos
+        @st.cache_resource
+        def cargar_modelos():
+            modelos = {}
+            modelos_drive = {
+                "modelo_3": "16yShYONQ7E_YpkuFQ1HiWNRSutGzhzIk", 
+                "modelo_4": "1sg7TTVjqm6kPEDL6sUJn_6NWsTJdLWE1",
+                "modelo_5": "1flP34CF0BS-7dU-Bmoxr0jTRIUYMSEC6", 
+                "modelo_6": "17s7NiPtdOQ0D8S9K5eezYGlpJ51OWazV",
+                "modelo_8": "1MmdfVGFtqYdCft3IEdY6vdKlr8ttUk_l"
+            }
+            carpeta = "clasificadores"
+            os.makedirs(carpeta, exist_ok=True)
+            for nombre, file_id in modelos_drive.items():
+                ruta_local = os.path.join(carpeta, f"{nombre}.pkl")
+                if not os.path.exists(ruta_local):
+                    gdown.download(id=file_id, output=ruta_local, quiet=False)
+                modelos[nombre] = joblib.load(ruta_local)
+            return modelos
+    
+        modelos = cargar_modelos()
+    
+        col1, col2 = st.columns([1,2])
+        with col1:
+            st.subheader(canvas_title)
+            st.info(canvas_note)
+            canvas_result = st_canvas(
+                fill_color="black",
+                stroke_width=20,
+                stroke_color="white",
+                background_color="black",
+                height=280,
+                width=280,
+                drawing_mode="freedraw",
+                key="canvas",
+            )
+            btn_predecir = st.button(btn_text, type="primary", use_container_width=True)
+            st.caption(f"{supported_chars}: {EMNIST_MAPPING}")
+    
+        with col2:
+            st.subheader(ensemble_title)
+            if btn_predecir and canvas_result.image_data is not None:
+                img_array = canvas_result.image_data.astype(np.uint8)
+                gray = cv2.cvtColor(img_array, cv2.COLOR_RGBA2GRAY)
+                resized = cv2.resize(gray, (28,28), interpolation=cv2.INTER_AREA)
+                flattened = np.transpose(resized).reshape(1,784)/255.0
+    
+                prob_total = None
+                resultados = []
+    
+                for nombre, modelo_cargado in modelos.items():
+                    if isinstance(modelo_cargado, tuple):
+                        transformador, modelo = modelo_cargado
+                        X = transformador.transform(flattened)
+                    else:
+                        modelo = modelo_cargado
+                        X = flattened
+                    if hasattr(modelo, "predict_proba"):
+                        prob = modelo.predict_proba(X)[0]
+                    else:
+                        pred = modelo.predict(X)[0]
+                        prob = np.zeros(len(EMNIST_MAPPING))
+                        prob[pred]=1
+                    prob_total = prob if prob_total is None else prob_total + prob
+                    idx = np.argsort(prob)[-3:][::-1]
+                    top1, top2, top3 = idx
+                    c1, c2, c3 = prob[top1], prob[top2], prob[top3]
+                    p1, p2, p3 = EMNIST_MAPPING[top1], EMNIST_MAPPING[top2], EMNIST_MAPPING[top3]
+                    resultados.append({
+                        "Model": nombre if lang=="English" else "Modelo",
+                        "Prediction 1" if lang=="English" else "Predicción 1": f"{p1} ({c1*100:.1f}%)",
+                        "Prediction 2" if lang=="English" else "Predicción 2": f"{p2} ({c2*100:.1f}%)",
+                        "Prediction 3" if lang=="English" else "Predicción 3": f"{p3} ({c3*100:.1f}%)"
+                    })
+    
+                prob_prom = prob_total / len(modelos)
+                final_char = EMNIST_MAPPING[np.argmax(prob_prom)]
+                confianza = np.max(prob_prom)
+                color = "green" if confianza >= 0.6 else "red"
+    
+                st.markdown(f"""
+                <div style="background-color:#1E1E1E; border:2px solid {color}; border-radius:12px; padding:20px; text-align:center;">
+                    <h3 style="color:#9E9E9E; margin:0;">{final_consensus}</h3>
+                    <h1 style="color:white; font-size:60px; margin:0;">{final_char}</h1>
+                    <p style="color:{color}; font-size:20px; margin:0;">Confidence / Confianza: {confianza*100:.1f}%</p>
+                </div>
+                """, unsafe_allow_html=True)
+    
+                st.markdown(model_breakdown)
+                st.dataframe(pd.DataFrame(resultados), use_container_width=True, hide_index=True)
+            else:
+                st.info(empty_note)
 # ========================
 # MONTE CARLO
 # ========================
@@ -513,6 +537,7 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
 
 
 
