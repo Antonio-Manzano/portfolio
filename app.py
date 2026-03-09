@@ -278,7 +278,7 @@ with tab_github:
         </button></a>
         """,
         unsafe_allow_html=True
-    ))
+    )
     
     # ==========================================
     # Project 3: Flooded
@@ -315,7 +315,7 @@ with tab_github:
         </button></a>
         """,
         unsafe_allow_html=True
-    ))
+    )
 # ========================
 # EMNIST
 # ========================
@@ -452,6 +452,7 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
 
 
 
