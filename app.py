@@ -320,21 +320,34 @@ with tab_github:
 # EMNIST
 # ========================
 with tab_emnist:
-    if language == "English":
-        st.title("Optical Character Recognition: EMNIST Classification")
-        draw_text = "Draw a character in the box:"
-        run_button = "Run Models"
-        analysis_text = "Ensemble Analysis"
-    else:
-        st.title("Reconocimiento Óptico: Clasificación EMNIST")
-        draw_text = "Dibuja un caracter en el recuadro:"
-        run_button = "Ejecutar Modelos"
-        analysis_text = "Análisis del Ensamble"
-
+    st.title("Reconocimiento Óptico EMNIST")
     EMNIST_MAPPING = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabdefghnqrt"
+
+    # Cargar modelos
+    @st.cache_resource
+    def cargar_modelos():
+        modelos = {}
+        modelos_drive = {
+            "modelo_3": "16yShYONQ7E_YpkuFQ1HiWNRSutGzhzIk", 
+            "modelo_4": "1sg7TTVjqm6kPEDL6sUJn_6NWsTJdLWE1",
+            "modelo_5": "1flP34CF0BS-7dU-Bmoxr0jTRIUYMSEC6", 
+            "modelo_6": "17s7NiPtdOQ0D8S9K5eezYGlpJ51OWazV",
+            "modelo_8": "1MmdfVGFtqYdCft3IEdY6vdKlr8ttUk_l"
+        }
+        carpeta = "clasificadores"
+        os.makedirs(carpeta, exist_ok=True)
+        for nombre, file_id in modelos_drive.items():
+            ruta_local = os.path.join(carpeta, f"{nombre}.pkl")
+            if not os.path.exists(ruta_local):
+                gdown.download(id=file_id, output=ruta_local, quiet=False)
+            modelos[nombre] = joblib.load(ruta_local)
+        return modelos
+
+    modelos = cargar_modelos()
+
     col1, col2 = st.columns([1,2])
     with col1:
-        st.subheader(draw_text)
+        st.subheader("Lienzo de Dibujo")
         canvas_result = st_canvas(
             fill_color="black",
             stroke_width=20,
@@ -345,11 +358,59 @@ with tab_emnist:
             drawing_mode="freedraw",
             key="canvas",
         )
-        btn_predecir = st.button(run_button, type="primary", use_container_width=True)
-        st.caption(f"Supported characters: {EMNIST_MAPPING}")
+        btn_predecir = st.button("Ejecutar Modelos", type="primary", use_container_width=True)
+        st.caption(f"Caracteres soportados: {EMNIST_MAPPING}")
+
     with col2:
-        st.subheader(analysis_text)
-        st.info("Draw something and press the button to run models.")
+        st.subheader("Análisis del Ensamble")
+        if btn_predecir and canvas_result.image_data is not None:
+            img_array = canvas_result.image_data.astype(np.uint8)
+            gray = cv2.cvtColor(img_array, cv2.COLOR_RGBA2GRAY)
+            resized = cv2.resize(gray, (28,28), interpolation=cv2.INTER_AREA)
+            flattened = np.transpose(resized).reshape(1,784)/255.0
+
+            prob_total = None
+            resultados = []
+
+            for nombre, modelo_cargado in modelos.items():
+                if isinstance(modelo_cargado, tuple):
+                    transformador, modelo = modelo_cargado
+                    X = transformador.transform(flattened)
+                else:
+                    modelo = modelo_cargado
+                    X = flattened
+                if hasattr(modelo, "predict_proba"):
+                    prob = modelo.predict_proba(X)[0]
+                else:
+                    pred = modelo.predict(X)[0]
+                    prob = np.zeros(len(EMNIST_MAPPING))
+                    prob[pred]=1
+                prob_total = prob if prob_total is None else prob_total + prob
+                idx = np.argsort(prob)[-3:][::-1]
+                top1, top2, top3 = idx
+                c1, c2, c3 = prob[top1], prob[top2], prob[top3]
+                p1, p2, p3 = EMNIST_MAPPING[top1], EMNIST_MAPPING[top2], EMNIST_MAPPING[top3]
+                resultados.append({
+                    "Modelo": nombre,
+                    "Predicción 1": f"{p1} ({c1*100:.1f}%)",
+                    "Predicción 2": f"{p2} ({c2*100:.1f}%)",
+                    "Predicción 3": f"{p3} ({c3*100:.1f}%)"
+                })
+            prob_prom = prob_total / len(modelos)
+            final_char = EMNIST_MAPPING[np.argmax(prob_prom)]
+            confianza = np.max(prob_prom)
+            color = "green" if confianza >= 0.6 else "red"
+            st.markdown(f"""
+            <div style="background-color:#1E1E1E; border:2px solid {color}; border-radius:12px; padding:20px; text-align:center;">
+                <h3 style="color:#9E9E9E; margin:0;">Consenso Final</h3>
+                <h1 style="color:white; font-size:60px; margin:0;">{final_char}</h1>
+                <p style="color:{color}; font-size:20px; margin:0;">Confianza: {confianza*100:.1f}%</p>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("**Desglose por Modelo:**")
+            st.dataframe(pd.DataFrame(resultados), use_container_width=True, hide_index=True)
+        else:
+            st.info("Dibuja algo en el lienzo y presiona 'Ejecutar Modelos'.")
 
 # ========================
 # MONTE CARLO
@@ -452,6 +513,7 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
 
 
 
