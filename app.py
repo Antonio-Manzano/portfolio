@@ -231,7 +231,7 @@ with tab_github:
     - **Algoritmia:** Árboles y listas enlazadas para búsqueda, inserción y eliminación.
     - **Optimización:** Reducción del overhead computacional mediante estructuración lógica de los datos.
     """)
-with col2:
+        with col2:
     st.info("Concepts: C++, Memory Management, Algorithmic Complexity")
     
     st.markdown(
@@ -242,7 +242,7 @@ with col2:
         </button></a>
         """,
         unsafe_allow_html=True
-    ))
+    )
     # ==========================================
     # Project 2: Iticritics
     # ==========================================
@@ -452,6 +452,7 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
 
 
 
