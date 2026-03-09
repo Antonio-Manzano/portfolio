@@ -26,8 +26,8 @@ language = st.sidebar.selectbox("Select Language / Selecciona Idioma", ["English
 # ========================
 # Tabs principales
 # ========================
-tab_home, tab_emnist, tab_montecarlo, tab_series = st.tabs(
-    ["Home", "EMNIST", "Monte Carlo", "Series Temporales"]
+tab_home, tab_github, tab_emnist, tab_montecarlo, tab_series = st.tabs(
+    ["Home", "GitHub Proyects", "EMNIST", "Monte Carlo", "Time Series"]
 )
 
 # ========================
@@ -200,6 +200,96 @@ Usa el panel de navegación a la izquierda para explorar los proyectos e interac
         st.markdown("**Contacto**")
         st.markdown("Email: gracetimesant@gmail.com  \nLinkedIn: linkedin.com/in/antonio-manzano-c")
 
+
+with tab_github:
+    if language == "English":
+        st.markdown("### Projects")
+    else:
+        st.markdown("### Proyectos")
+    
+    # ==========================================
+    # Project 1: Edulibreria
+    # ==========================================
+    with st.expander("Edulibreria | Advanced Data Structures in C++", expanded=False if language=="Español" else True):
+        col1, col2 = st.columns([2,1])
+        with col1:
+            if language=="English":
+                st.markdown("""
+    **Academic Objective:** Understand memory management and implement complex data structures manually without high-level libraries.
+    
+    **Technical Development:**
+    - **Implementation:** Inventory management software in pure C++.
+    - **Algorithms:** Trees and linked lists for efficient search, insertion, and deletion.
+    - **Optimization:** Reduce computational overhead by structuring data logically.
+    """)
+            else:
+                st.markdown("""
+    **Objetivo Académico:** Comprender el manejo de memoria e implementar estructuras de datos complejas sin librerías de alto nivel.
+    
+    **Desarrollo Técnico:**
+    - **Implementación:** Software de gestión de inventario en C++ puro.
+    - **Algoritmia:** Árboles y listas enlazadas para búsqueda, inserción y eliminación.
+    - **Optimización:** Reducción del overhead computacional mediante estructuración lógica de los datos.
+    """)
+        with col2:
+            st.info("Concepts: C++, Memory Management, Algorithmic Complexity")
+            st.button("View on GitHub", key="edulibreria", on_click=lambda: st.experimental_set_query_params(url="https://github.com/TU_USUARIO/edulibreria"))
+    
+    # ==========================================
+    # Project 2: Iticritics
+    # ==========================================
+    with st.expander("Iticritics | Relational Database Design (SQL)"):
+        col1, col2 = st.columns([2,1])
+        with col1:
+            if language=="English":
+                st.markdown("""
+    **Academic Objective:** Design a normalized database architecture and integrate with a backend server.
+    
+    **Technical Development:**
+    - **Data Modeling:** Robust relational schemas for users, reviews, and metadata.
+    - **Queries:** Optimize queries for low-latency data retrieval.
+    - **Backend Integration:** Node.js + JavaScript for server logic.
+    """)
+            else:
+                st.markdown("""
+    **Objetivo Académico:** Diseñar arquitectura de base de datos normalizada e integrarla con un backend.
+    
+    **Desarrollo Técnico:**
+    - **Modelado de Datos:** Esquemas relacionales robustos (SQL) para usuarios, reseñas y metadatos.
+    - **Consultas:** Optimización de queries para baja latencia.
+    - **Integración Backend:** Node.js + JavaScript para la lógica del servidor.
+    """)
+        with col2:
+            st.info("Concepts: SQL Normalized, Node.js, Client-Server Architecture")
+            st.button("View on GitHub", key="iticritics", on_click=lambda: st.experimental_set_query_params(url="https://github.com/TU_USUARIO/iticritics"))
+    
+    # ==========================================
+    # Project 3: Flooded
+    # ==========================================
+    with st.expander("Flooded | Full Stack & NoSQL Development"):
+        col1, col2 = st.columns([2,1])
+        with col1:
+            if language=="English":
+                st.markdown("""
+    **Academic Objective:** Apply agile methodologies in building a MERN Stack platform focusing on scalability and data flexibility.
+    
+    **Technical Development:**
+    - **Flexible Schemas:** MongoDB & Mongoose for unstructured or changing data.
+    - **RESTful API:** Express.js endpoints for secure CRUD operations.
+    - **Frontend:** React.js integration showing full data flow.
+    """)
+            else:
+                st.markdown("""
+    **Objetivo Académico:** Aplicar metodologías ágiles en una plataforma MERN, enfocándose en escalabilidad y flexibilidad de datos.
+    
+    **Desarrollo Técnico:**
+    - **Esquemas Flexibles:** MongoDB & Mongoose para datos no estructurados o cambiantes.
+    - **API RESTful:** Endpoints con Express.js para operaciones CRUD.
+    - **Frontend:** Integración con React.js mostrando flujo completo de datos.
+    """)
+        with col2:
+            st.info("Concepts: MongoDB (NoSQL), API Creation, React.js")
+            st.button("View on GitHub", key="flooded", on_click=lambda: st.experimental_set_query_params(url="https://github.com/TU_USUARIO/flooded"))
 # ========================
 # EMNIST
 # ========================
@@ -336,3 +426,4 @@ with tab_series:
             fig.add_trace(go.Scatter(x=data['Date'], y=data['MA200'], line=dict(color='red',width=1.5), name='MA200'))
             fig.update_layout(xaxis_rangeslider_visible=False, height=600, template="plotly_white")
             st.plotly_chart(fig,use_container_width=True)
+
